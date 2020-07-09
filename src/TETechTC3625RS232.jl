@@ -25,7 +25,7 @@ function configure_port(name)
     sp_set_config_dtr(config, SP_DTR_OFF)
     sp_set_config_dsr(config, SP_DSR_IGNORE)
     sp_set_config(port, config)
-    
+
     return port
 end
 
@@ -39,7 +39,7 @@ function checksum(CMD)
     decimal = map(i -> convert(Int64, hex[i]), 1:length(hex))
     eight_bit_checksum = sum(decimal)
     hex_for_last_two_digit = string(eight_bit_checksum, base = 16)
-    two_of = hex_for_last_two_digit[end-1:end]   
+    two_of = hex_for_last_two_digit[end-1:end]
 end
 
 
@@ -59,10 +59,10 @@ twocomp(x) = (2^32 - x) * (-1)
 """
 function write_controller(port, STRING)
     sp_flush(port, SPBuffer(3))
-    CMD = ADDRESS*STRING
+    CMD = ADDRESS * STRING
     CHECKSUM = checksum(CMD)
-    SEND = STX*CMD*CHECKSUM*ETX
-    sp_nonblocking_write(port, SEND); #read the sensor
+    SEND = STX * CMD * CHECKSUM * ETX
+    sp_nonblocking_write(port, SEND) #read the sensor
     sleep(0.06)
     nbytes_read, bytes = sp_nonblocking_read(port, 12)
     sendback = String(bytes)
@@ -102,12 +102,12 @@ end
 function set_temperature(port, value)
     sign = (value > 0) ? :+ : :-
     if sign == :+
-        step1 = convert(Int64, floor(value*100[1]))
+        step1 = convert(Int64, floor(value * 100[1]))
         step2 = string(step1, base = 16)
-        cmd = "1c"*lpad(step2,8,"0")    
+        cmd = "1c" * lpad(step2, 8, "0")
     else
         step1 = convert(Int64, floor(value * 100[1]))
-        step2 = (sign == :+) ? step1 : convert(Int64, (2^32)+step1[1]) 
+        step2 = (sign == :+) ? step1 : convert(Int64, (2^32) + step1[1])
         step3 = string(step2, base = 16)
         cmd = "1c" * step3
     end
@@ -115,7 +115,7 @@ function set_temperature(port, value)
     str = write_controller(port, cmd)
     if ~isnothing(str)
         return decode_temperature(str, sign)
-    else 
+    else
         return nothing
     end
 end
@@ -130,7 +130,7 @@ function read_sensor_T1(port)
     str = write_controller(port, "0100000000")
     if ~isnothing(str)
         sign = (str[1:2] == "ff") ? :- : :+
-        return decode_temperature(str,sign)
+        return decode_temperature(str, sign)
     else
         return missing
     end
@@ -140,7 +140,7 @@ end
     read_TE_sensor_T2(port)
 
     This function reads INPUT2 from the controller
-""" 
+"""
 function read_sensor_T2(port)
     str = write_controller(port, "0600000000")
     if ~isnothing(str)
@@ -155,22 +155,22 @@ end
     turn_power_on(port)
 
     This function enables power from controller to TE element
-""" 
+"""
 function turn_power_on(port)
     cmd = "2d"
     str = "00000001"
-    ret = write_controller(port, cmd*str)
+    ret = write_controller(port, cmd * str)
 end
 
 """
     turn_power_on(port)
 
     This function disables power from controller to TE element
-""" 
+"""
 function turn_power_off(port)
     cmd = "2d"
     str = "00000000"
-    ret = write_controller(port, cmd*str)
+    ret = write_controller(port, cmd * str)
 end
 
 """
@@ -183,11 +183,11 @@ end
         3: TS165 230K
         4: TS104 50K
         5: YSI H TP53 10K
-""" 
+"""
 function read_sensor_type(port)
     cmd = "43"
     str = "00000000"
-    ret = write_controller(port, cmd*str)
+    ret = write_controller(port, cmd * str)
 end
 
 """
@@ -200,11 +200,11 @@ end
         3: TS165 230K
         4: TS104 50K
         5: YSI H TP53 10K
-""" 
+"""
 function set_sensor_type(port, value)
     cmd = "2a"
-    str = "0000000"*string(value)
-    ret = write_controller(port, cmd*str)
+    str = "0000000" * string(value)
+    ret = write_controller(port, cmd * str)
 end
 
 """
@@ -218,7 +218,7 @@ end
 function read_proportional_bandwidth(port)
     cmd = "51"
     str = "00000000"
-    str = write_controller(port, cmd*str)
+    str = write_controller(port, cmd * str)
     if ~isnothing(str)
         sign = (str[1:2] == "ff") ? :- : :+
         return decode_temperature(str, sign)
@@ -236,9 +236,9 @@ end
      5 ° above and 5 ° below set point.
 """
 function write_proportional_bandwidth(port, value)
-    step1 = convert(Int64, floor(value*100[1]))
+    step1 = convert(Int64, floor(value * 100[1]))
     step2 = string(step1, base = 16)
-    cmd = "1d"*lpad(step2,8,"0")
+    cmd = "1d" * lpad(step2, 8, "0")
     str = write_controller(port, cmd)
     if ~isnothing(str)
         sign = (str[1:2] == "ff") ? :- : :+
@@ -256,7 +256,7 @@ end
 function read_integral_gain(port)
     cmd = "52"
     str = "00000000"
-    str = write_controller(port, cmd*str)
+    str = write_controller(port, cmd * str)
     if ~isnothing(str)
         return decode_temperature(str, :+)
     else
@@ -270,9 +270,9 @@ end
     Fixed-point gain in repeats/min
 """
 function write_integral_gain(port, value)
-    step1 = convert(Int64, floor(value*100[1]))
+    step1 = convert(Int64, floor(value * 100[1]))
     step2 = string(step1, base = 16)
-    cmd = "1e"*lpad(step2,8,"0")
+    cmd = "1e" * lpad(step2, 8, "0")
     str = write_controller(port, cmd)
     if ~isnothing(str)
         return decode_temperature(str, :+)
@@ -289,7 +289,7 @@ end
 function read_derivative_gain(port)
     cmd = "53"
     str = "00000000"
-    str = write_controller(port, cmd*str)
+    str = write_controller(port, cmd * str)
     if ~isnothing(str)
         return decode_temperature(str, :+)
     else
@@ -303,9 +303,9 @@ end
     Fixed-point gain in min
 """
 function write_derivative_gain(port, value)
-    step1 = convert(Int64, floor(value*100[1]))
+    step1 = convert(Int64, floor(value * 100[1]))
     step2 = string(step1, base = 16)
-    cmd = "1f"*lpad(step2,8,"0")
+    cmd = "1f" * lpad(step2, 8, "0")
     str = write_controller(port, cmd)
     if ~isnothing(str)
         return decode_temperature(str, :+)
