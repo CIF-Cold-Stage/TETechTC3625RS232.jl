@@ -318,9 +318,17 @@ function read_power_output(port)
     cmd = "02"
     str = "00000000"
     str = write_controller(port, cmd * str)
-    sign = (str[1:2] == "ff") ? :- : :+
-    power = decode_temperature(str, sign)
-    return power/5.11*100
+    sign = try 
+        (str[1:2] == "ff") ? :- : :+
+    catch 
+        :error
+    end
+    if sign != :error
+        power = decode_temperature(str, sign)
+        return power/5.11*100
+    else
+        return missing
+    end
 end
 
 function read_output_polarity(port)
@@ -328,11 +336,17 @@ function read_output_polarity(port)
     str = "00000000"
 
     str = write_controller(port, cmd * str)
-    i = parse(Int64, str; base=16)
+    i = try 
+        parse(Int64, str; base=16)
+    catch 
+        -1
+    end
     if i == 1
         return "HEAT WP2+ and WP1-"
-    else
+    elseif i == 0
         return "HEAT WP1+ and WP2-"
+    else
+        return "Fail"
     end
 end
 
