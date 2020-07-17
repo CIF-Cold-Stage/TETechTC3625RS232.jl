@@ -314,4 +314,45 @@ function write_derivative_gain(port, value)
     end
 end
 
+function read_power_output(port)
+    cmd = "02"
+    str = "00000000"
+    str = write_controller(port, cmd * str)
+    sign = (str[1:2] == "ff") ? :- : :+
+    power = decode_temperature(str, sign)
+    return power/5.11*100
+end
+
+function read_output_polarity(port)
+    cmd = "45"
+    str = "00000000"
+
+    str = write_controller(port, cmd * str)
+    i = parse(Int64, str; base=16)
+    if i == 1
+        return "HEAT WP2+ and WP1-"
+    else
+        return "HEAT WP1+ and WP2-"
+    end
+end
+
+function set_output_polarity(port, value)
+    cmd = "2c"
+    if value == 0
+        str = "00000000"
+    elseif value == 1
+        str = "00000001"
+    else
+        println("Error, not supported")
+    end
+
+    str = write_controller(port, cmd * str)
+    i = parse(Int64, str; base=16)
+    if i == 1
+        return "HEAT WP2+ and WP1-"
+    else
+        return "HEAT WP1+ and WP2-"
+    end
+end
+
 end
