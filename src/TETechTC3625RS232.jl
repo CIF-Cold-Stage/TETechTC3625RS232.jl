@@ -13,18 +13,18 @@ const ADDRESS = "00"
     This function configures the serial port for communication with the controller
 """
 function configure_port(name)
-    port = sp_get_port_by_name(name)
-    sp_open(port, SP_MODE_READ_WRITE)
-    config = sp_get_config(port)
-    sp_set_config_baudrate(config, 9600)
-    sp_set_config_parity(config, SP_PARITY_NONE)
-    sp_set_config_bits(config, 8)
-    sp_set_config_stopbits(config, 1)
-    sp_set_config_rts(config, SP_RTS_OFF)
-    sp_set_config_cts(config, SP_CTS_IGNORE)
-    sp_set_config_dtr(config, SP_DTR_OFF)
-    sp_set_config_dsr(config, SP_DSR_IGNORE)
-    sp_set_config(port, config)
+    port = LibSerialPort.sp_get_port_by_name(name)
+    LibSerialPort.sp_open(port, SP_MODE_READ_WRITE)
+    config = LibSerialPort.sp_get_config(port)
+    LibSerialPort.sp_set_config_baudrate(config, 9600)
+    LibSerialPort.sp_set_config_parity(config, SP_PARITY_NONE)
+    LibSerialPort.sp_set_config_bits(config, 8)
+    LibSerialPort.sp_set_config_stopbits(config, 1)
+    LibSerialPort.sp_set_config_rts(config, SP_RTS_OFF)
+    LibSerialPort.sp_set_config_cts(config, SP_CTS_IGNORE)
+    LibSerialPort.sp_set_config_dtr(config, SP_DTR_OFF)
+    LibSerialPort.sp_set_config_dsr(config, SP_DSR_IGNORE)
+    LibSerialPort.sp_set_config(port, config)
 
     return port
 end
@@ -58,13 +58,13 @@ twocomp(x) = (2^32 - x) * (-1)
     The function tests for errors. If no error it returns the controller response string.
 """
 function write_controller(port, STRING)
-    sp_flush(port, SPBuffer(3))
+    LibSerialPort.sp_flush(port, SPBuffer(3))
     CMD = ADDRESS * STRING
     CHECKSUM = checksum(CMD)
     SEND = STX * CMD * CHECKSUM * ETX
-    sp_nonblocking_write(port, SEND) #read the sensor
+    LibSerialPort.sp_nonblocking_write(port, SEND) #read the sensor
     sleep(0.06)
-    nbytes_read, bytes = sp_nonblocking_read(port, 12)
+    nbytes_read, bytes = LibSerialPort.sp_nonblocking_read(port, 12)
     sendback = String(bytes)
     if string(sendback[end]) != ACK
         println("Controller did not acknowledge, is it on and plugged in?")
