@@ -369,4 +369,50 @@ function set_output_polarity(port, value)
     end
 end
 
+function read_heat_multiplier(port)
+    cmd = "5c"
+    str = "00000000"
+    str = write_controller(port, cmd * str)
+    if ~isnothing(str)
+        return decode_temperature(str, :+)
+    else
+        return missing
+    end
+end
+
+function write_heat_multiplier(port, value)
+    step1 = convert(Int64, floor(value * 100[1]))
+    step2 = string(step1, base = 16)
+    cmd = "0c" * lpad(step2, 8, "0")
+    str = write_controller(port, cmd)
+    if ~isnothing(str)
+        return decode_temperature(str, :+)
+    else
+        return missing
+    end
+end
+
+function read_cool_multiplier(port)
+    cmd = "5d"
+    str = "00000000"
+    str = write_controller(port, cmd * str)
+    if ~isnothing(str)
+        return decode_temperature(str, :+)
+    else
+        return missing
+    end
+end
+
+function write_cool_multiplier(port, value)
+    step1 = convert(Int64, floor(value * 100[1]))
+    step2 = string(step1, base = 16)
+    cmd = "0d" * lpad(step2, 8, "0")
+    str = write_controller(port, cmd)
+    if ~isnothing(str)
+        return decode_temperature(str, :+)
+    else
+        return missing
+    end
+end
+
 end
